@@ -219,7 +219,7 @@ export default function Pricing() {
         <div className="card p-8 max-w-2xl mx-auto">
           <h2 className="text-2xl font-bold text-black mb-4">Ready to get started?</h2>
           <p className="text-gray-600 mb-6">
-            Join thousands of admissions offices already using ProctorAI to streamline their processes.
+            Join thousands of admissions offices already using Proctor AI Voice Agent to streamline their processes.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <button className="btn-primary">

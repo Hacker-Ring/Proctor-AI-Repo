@@ -31,7 +31,7 @@ const mockOfficers: Officer[] = [
   {
     id: '1',
     name: 'Sarah Johnson',
-    email: 'sarah.johnson@proctorai.com',
+    email: 'sarah.johnson@proctoraivoice.com',
     callsDone: 156,
     cost: 2340.50,
     avgCallDuration: '12m 34s',
@@ -41,7 +41,7 @@ const mockOfficers: Officer[] = [
   {
     id: '2',
     name: 'Michael Chen',
-    email: 'michael.chen@proctorai.com',
+    email: 'michael.chen@proctoraivoice.com',
     callsDone: 203,
     cost: 3045.75,
     avgCallDuration: '9m 12s',
@@ -51,7 +51,7 @@ const mockOfficers: Officer[] = [
   {
     id: '3',
     name: 'Emily Rodriguez',
-    email: 'emily.rodriguez@proctorai.com',
+    email: 'emily.rodriguez@proctoraivoice.com',
     callsDone: 89,
     cost: 1335.25,
     avgCallDuration: '15m 8s',
@@ -61,7 +61,7 @@ const mockOfficers: Officer[] = [
   {
     id: '4',
     name: 'David Kim',
-    email: 'david.kim@proctorai.com',
+    email: 'david.kim@proctoraivoice.com',
     callsDone: 178,
     cost: 2670.00,
     avgCallDuration: '11m 45s',
@@ -71,7 +71,7 @@ const mockOfficers: Officer[] = [
   {
     id: '5',
     name: 'Lisa Thompson',
-    email: 'lisa.thompson@proctorai.com',
+    email: 'lisa.thompson@proctoraivoice.com',
     callsDone: 134,
     cost: 2010.50,
     avgCallDuration: '13m 22s',
@@ -81,7 +81,7 @@ const mockOfficers: Officer[] = [
   {
     id: '6',
     name: 'James Wilson',
-    email: 'james.wilson@proctorai.com',
+    email: 'james.wilson@proctoraivoice.com',
     callsDone: 245,
     cost: 3675.00,
     avgCallDuration: '8m 56s',
