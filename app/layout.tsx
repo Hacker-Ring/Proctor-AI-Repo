@@ -7,6 +7,7 @@ import {
   SignedOut,
   UserButton,
 } from "@clerk/nextjs";
+import Sidebar from "./components/Sidebar";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -23,51 +24,62 @@ export default function RootLayout({
     <ClerkProvider>
       <html lang="en">
         <body>
-          <header className="bg-white shadow-sm border-b">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-              <div className="flex justify-between items-center h-16">
-                <div className="flex items-center">
-                  <a href="/" className="text-xl font-semibold text-gray-900 hover:text-blue-600 transition-colors">
-                    ProctorAI Admissions
-                  </a>
-                </div>
-                <div className="flex items-center space-x-4">
-                  <SignedOut>
-                    <SignInButton mode="modal">
-                      <button className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors">
-                        Sign In
-                      </button>
-                    </SignInButton>
-                    <SignUpButton mode="modal">
-                      <button className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors">
-                        Sign Up
-                      </button>
-                    </SignUpButton>
-                  </SignedOut>
-                  <SignedIn>
-                    <nav className="hidden md:flex space-x-8">
-                      <a href="/dashboard" className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors">
-                        Dashboard
-                      </a>
-                      <a href="/exam" className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors">
-                        Exam
-                      </a>
-                    </nav>
-                    <UserButton 
-                      appearance={{
-                        elements: {
-                          avatarBox: "w-8 h-8"
-                        }
-                      }}
-                    />
-                  </SignedIn>
-                </div>
+          <SignedIn>
+            <div className="flex min-h-screen">
+              <Sidebar />
+              <div className="flex-1 flex flex-col">
+                <header className="bg-white border-b border-gray-200 px-6 py-4">
+                  <div className="flex justify-between items-center">
+                    <div className="flex items-center space-x-4">
+                      <h2 className="text-lg font-semibold text-gray-900">Welcome back</h2>
+                    </div>
+                    <div className="flex items-center space-x-4">
+                      <UserButton 
+                        appearance={{
+                          elements: {
+                            avatarBox: "w-8 h-8 rounded-[6px]"
+                          }
+                        }}
+                      />
+                    </div>
+                  </div>
+                </header>
+                <main className="flex-1 bg-white">
+                  {children}
+                </main>
               </div>
             </div>
-          </header>
-          <main className="min-h-screen bg-gray-50">
-            {children}
-          </main>
+          </SignedIn>
+          <SignedOut>
+            <div className="min-h-screen bg-white">
+              <header className="bg-white border-b border-gray-200">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                  <div className="flex justify-between items-center h-16">
+                    <div className="flex items-center">
+                      <a href="/" className="text-xl font-bold text-black hover:text-gray-700 transition-colors">
+                        ProctorAI Admissions
+                      </a>
+                    </div>
+                    <div className="flex items-center space-x-4">
+                      <SignInButton mode="modal">
+                        <button className="btn-primary">
+                          Sign In
+                        </button>
+                      </SignInButton>
+                      <SignUpButton mode="modal">
+                        <button className="btn-secondary">
+                          Sign Up
+                        </button>
+                      </SignUpButton>
+                    </div>
+                  </div>
+                </div>
+              </header>
+              <main className="min-h-screen bg-white">
+                {children}
+              </main>
+            </div>
+          </SignedOut>
         </body>
       </html>
     </ClerkProvider>
