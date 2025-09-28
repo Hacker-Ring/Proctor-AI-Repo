@@ -43,8 +43,11 @@ export async function middleware(req: NextRequest) {
 
   // Only get user if we have a valid session
   let user = session?.user
-  if (!user && sessionError) {
-    console.log('Session error:', sessionError.message)
+  if (!user) {
+    const {
+      data: { user: userData },
+    } = await supabase.auth.getUser()
+    user = userData || undefined
   }
 
   // Debug: Log all cookies to see what's available

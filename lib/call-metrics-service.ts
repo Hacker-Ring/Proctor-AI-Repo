@@ -205,9 +205,10 @@ export class CallMetricsService {
         throw new Error(`Failed to fetch call statistics: ${error.message}`)
       }
 
-      const calls = (data || []) as any[]
+      // Explicitly type calls to avoid 'never' type error
+      const calls: { call_duration: number; start_time: string }[] = (data as any[]) || []
       const totalCalls = calls.length
-      const totalDuration = calls.reduce((sum, call) => sum + call.call_duration, 0)
+      const totalDuration = calls.reduce((sum, call) => sum + (call.call_duration || 0), 0)
       const averageDuration = totalCalls > 0 ? totalDuration / totalCalls : 0
 
       // Calculate calls this month
