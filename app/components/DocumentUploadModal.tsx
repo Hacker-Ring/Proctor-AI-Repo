@@ -2,7 +2,7 @@
 
 import { useState, useRef } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { DocumentService } from '../../lib/document-service';
+import { DocumentServiceClient } from '../../lib/document-service-client';
 
 interface DocumentUploadModalProps {
   isOpen: boolean;
@@ -99,7 +99,7 @@ export default function DocumentUploadModal({ isOpen, onClose, onUploadSuccess }
         const file = selectedFiles[i];
         setUploadProgress((i / selectedFiles.length) * 100);
         
-        await DocumentService.uploadDocument(
+        await DocumentServiceClient.uploadDocument(
           user.id,
           file,
           documentType

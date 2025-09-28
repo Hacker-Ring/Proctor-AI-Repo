@@ -2,8 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { CallMetricsService } from '../../lib/call-metrics-service';
-import { DocumentService } from '../../lib/document-service';
+import { CallMetricsServiceClient } from '../../lib/call-metrics-service-client';
+import { DocumentServiceClient } from '../../lib/document-service-client';
 import ProtectedLayout from '../components/ProtectedLayout';
 
 export default function AnalyticsPage() {
@@ -20,8 +20,8 @@ export default function AnalyticsPage() {
       try {
         setLoading(true);
         const [calls, docs] = await Promise.all([
-          CallMetricsService.getUserCallMetrics(user.id),
-          DocumentService.getUserDocuments(user.id)
+          CallMetricsServiceClient.getUserCallMetrics(user.id),
+          DocumentServiceClient.getUserDocuments(user.id)
         ]);
         
         setCallMetrics(calls);

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { CallMetricsService, VendorDetails } from '../../lib/call-metrics-service';
+import { CallMetricsServiceClient, VendorDetails } from '../../lib/call-metrics-service-client';
 import ProtectedLayout from '../components/ProtectedLayout';
 
 export default function CallsPage() {
@@ -29,7 +29,7 @@ export default function CallsPage() {
       
       try {
         setLoading(true);
-        const callMetrics = await CallMetricsService.getUserCallMetrics(user.id);
+        const callMetrics = await CallMetricsServiceClient.getUserCallMetrics(user.id);
         setCalls(callMetrics);
       } catch (error) {
         console.error('Failed to load calls:', error);
@@ -55,7 +55,7 @@ export default function CallsPage() {
       const startTime = new Date();
       const endTime = new Date(startTime.getTime() + parseInt(formData.duration) * 60 * 1000);
 
-      await CallMetricsService.saveCallMetrics(
+      await CallMetricsServiceClient.saveCallMetrics(
         user.id,
         formData.callId,
         parseInt(formData.duration) * 60, // Convert minutes to seconds
@@ -67,7 +67,7 @@ export default function CallsPage() {
       );
 
       // Reload calls
-      const updatedCalls = await CallMetricsService.getUserCallMetrics(user.id);
+      const updatedCalls = await CallMetricsServiceClient.getUserCallMetrics(user.id);
       setCalls(updatedCalls);
       setShowCreateForm(false);
       setFormData({
@@ -90,7 +90,7 @@ export default function CallsPage() {
     if (!confirm('Are you sure you want to delete this call?')) return;
 
     try {
-      await CallMetricsService.deleteCallMetrics(callId, user.id);
+      await CallMetricsServiceClient.deleteCallMetrics(callId, user.id);
       setCalls(prev => prev.filter(call => call.call_id !== callId));
     } catch (error) {
       console.error('Failed to delete call:', error);

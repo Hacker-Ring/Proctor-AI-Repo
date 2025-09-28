@@ -89,10 +89,8 @@ export async function middleware(req: NextRequest) {
     return NextResponse.redirect(new URL('/dashboard', req.url))
   }
 
-  // Redirect authenticated users from home page to dashboard
-  if (req.nextUrl.pathname === '/' && user) {
-    return NextResponse.redirect(new URL('/dashboard', req.url))
-  }
+  // Don't redirect from home page - let it show conditional content
+  // The home page will handle showing appropriate buttons based on auth state
 
   return response
 }

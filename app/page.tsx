@@ -1,12 +1,14 @@
-import { redirect } from "next/navigation";
 import Link from "next/link";
 import { createServerSupabaseClient } from "../lib/supabase-server";
 
 export default async function Home() {
   const supabase = createServerSupabaseClient();
   
+  // Check for session to determine navigation buttons
+  let isAuthenticated = false;
+  let user = null;
+  
   try {
-    // Check for session first, then get user from session
     const { data: { session }, error: sessionError } = await supabase.auth.getSession();
     
     console.log('Home page auth check:', { 
@@ -16,21 +18,13 @@ export default async function Home() {
       sessionError: sessionError?.message 
     });
     
-    // Automatically redirect authenticated users to dashboard
     if (session && session.user && !sessionError) {
-      console.log('Home page: User authenticated, redirecting to dashboard');
-      redirect("/dashboard");
-    }
-    
-    // If no session or error, redirect to signin page
-    if (!session || !session.user || sessionError) {
-      console.log('Home page: No valid session, redirecting to signin');
-      redirect("/auth/signin");
+      isAuthenticated = true;
+      user = session.user;
     }
   } catch (error) {
     console.error('Error checking user authentication:', error);
-    // On error, redirect to signin page
-    redirect("/auth/signin");
+    // Continue with unauthenticated state
   }
 
   return (
@@ -48,12 +42,20 @@ export default async function Home() {
               <a href="#support" className="text-gray-700 hover:text-black">Support</a>
               <a href="#legal" className="text-gray-700 hover:text-black">Legal</a>
             </nav>
-            <div className="flex items-center space-x-4">
-              <Link href="/auth/signin" className="text-gray-700 hover:text-black">Login</Link>
-              <Link href="/auth/signup" className="bg-black text-white px-4 py-2 rounded-lg font-medium hover:bg-gray-800 transition-colors">
-                Try it free
-              </Link>
-            </div>
+                <div className="flex items-center space-x-4">
+                  {isAuthenticated ? (
+                    <Link href="/dashboard" className="bg-black text-white px-4 py-2 rounded-lg font-medium hover:bg-gray-800 transition-colors">
+                      Go to Dashboard
+                    </Link>
+                  ) : (
+                    <>
+                      <Link href="/auth/signin" className="text-gray-700 hover:text-black">Login</Link>
+                      <Link href="/auth/signup" className="bg-black text-white px-4 py-2 rounded-lg font-medium hover:bg-gray-800 transition-colors">
+                        Try it free
+                      </Link>
+                    </>
+                  )}
+                </div>
           </div>
           
         </div>
@@ -69,12 +71,20 @@ export default async function Home() {
             ProctorAI creates custom tailored voice agents for companies to automate inbound and outbound calls using advanced AI technology.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="/auth/signup" className="bg-black text-white px-8 py-4 rounded-lg font-medium hover:bg-gray-800 transition-colors">
-              Start your free trial
-            </Link>
-            <Link href="#contact" className="bg-white text-black px-8 py-4 rounded-lg font-medium hover:bg-gray-50 transition-colors">
-              Talk to sales
-            </Link>
+            {isAuthenticated ? (
+              <Link href="/dashboard" className="bg-black text-white px-8 py-4 rounded-lg font-medium hover:bg-gray-800 transition-colors">
+                Go to Dashboard
+              </Link>
+            ) : (
+              <>
+                <Link href="/auth/signup" className="bg-black text-white px-8 py-4 rounded-lg font-medium hover:bg-gray-800 transition-colors">
+                  Start your free trial
+                </Link>
+                <Link href="#contact" className="bg-white text-black px-8 py-4 rounded-lg font-medium hover:bg-gray-50 transition-colors">
+                  Talk to sales
+                </Link>
+              </>
+            )}
           </div>
         </div>
       </section>

@@ -1,4 +1,4 @@
-import { createServerSupabaseClient } from './supabase-server'
+import { createClient } from './supabase-client'
 import { Database } from './database.types'
 
 type CallMetrics = Database['public']['Tables']['call_metrics']['Row']
@@ -12,7 +12,7 @@ export interface VendorDetails {
   additional_info?: Record<string, any>
 }
 
-export class CallMetricsService {
+export class CallMetricsServiceClient {
   /**
    * Save call metrics to database
    */
@@ -27,7 +27,7 @@ export class CallMetricsService {
     vendorDetails: VendorDetails
   ): Promise<CallMetrics> {
     try {
-      const supabase = createServerSupabaseClient()
+      const supabase = createClient()
       const callData: CallMetricsInsert = {
         user_id: userId,
         call_id: callId,
@@ -61,7 +61,7 @@ export class CallMetricsService {
    */
   static async getUserCallMetrics(userId: string): Promise<CallMetrics[]> {
     try {
-      const supabase = createServerSupabaseClient()
+      const supabase = createClient()
       const { data, error } = await supabase
         .from('call_metrics')
         .select('*')
@@ -84,7 +84,7 @@ export class CallMetricsService {
    */
   static async getCallByCallId(callId: string, userId: string): Promise<CallMetrics | null> {
     try {
-      const supabase = createServerSupabaseClient()
+      const supabase = createClient()
       const { data, error } = await supabase
         .from('call_metrics')
         .select('*')
@@ -115,7 +115,7 @@ export class CallMetricsService {
     endDate: Date
   ): Promise<CallMetrics[]> {
     try {
-      const supabase = createServerSupabaseClient()
+      const supabase = createClient()
       const { data, error } = await supabase
         .from('call_metrics')
         .select('*')
@@ -144,7 +144,7 @@ export class CallMetricsService {
     updates: Partial<CallMetricsUpdate>
   ): Promise<CallMetrics> {
     try {
-      const supabase = createServerSupabaseClient()
+      const supabase = createClient()
       const { data, error } = await (supabase as any)
         .from('call_metrics')
         .update(updates)
@@ -169,7 +169,7 @@ export class CallMetricsService {
    */
   static async deleteCallMetrics(callId: string, userId: string): Promise<void> {
     try {
-      const supabase = createServerSupabaseClient()
+      const supabase = createClient()
       const { error } = await supabase
         .from('call_metrics')
         .delete()
@@ -195,7 +195,7 @@ export class CallMetricsService {
     callsThisMonth: number
   }> {
     try {
-      const supabase = createServerSupabaseClient()
+      const supabase = createClient()
       const { data, error } = await supabase
         .from('call_metrics')
         .select('call_duration, start_time')

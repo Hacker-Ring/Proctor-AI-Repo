@@ -1,11 +1,11 @@
-import { createServerSupabaseClient } from './supabase-server'
+import { createClient } from './supabase-client'
 import { Database } from './database.types'
 
 type KnowledgeBase = Database['public']['Tables']['knowledge_base']['Row']
 type KnowledgeBaseInsert = Database['public']['Tables']['knowledge_base']['Insert']
 type KnowledgeBaseUpdate = Database['public']['Tables']['knowledge_base']['Update']
 
-export class DocumentService {
+export class DocumentServiceClient {
   /**
    * Upload a document to Supabase Storage and save metadata to database
    */
@@ -15,7 +15,7 @@ export class DocumentService {
     documentType: string
   ): Promise<KnowledgeBase> {
     try {
-      const supabase = createServerSupabaseClient()
+      const supabase = createClient()
       // Generate unique filename
       const fileExt = file.name.split('.').pop()
       const fileName = `${userId}/${Date.now()}.${fileExt}`
@@ -79,7 +79,7 @@ export class DocumentService {
    */
   static async getUserDocuments(userId: string): Promise<KnowledgeBase[]> {
     try {
-      const supabase = createServerSupabaseClient()
+      const supabase = createClient()
       const { data, error } = await supabase
         .from('knowledge_base')
         .select('*')
@@ -102,7 +102,7 @@ export class DocumentService {
    */
   static async getDocument(documentId: string, userId: string): Promise<KnowledgeBase | null> {
     try {
-      const supabase = createServerSupabaseClient()
+      const supabase = createClient()
       const { data, error } = await supabase
         .from('knowledge_base')
         .select('*')
@@ -129,7 +129,7 @@ export class DocumentService {
    */
   static async deleteDocument(documentId: string, userId: string): Promise<void> {
     try {
-      const supabase = createServerSupabaseClient()
+      const supabase = createClient()
       // First get the document to get the file path
       const document = await this.getDocument(documentId, userId)
       if (!document) {
@@ -174,7 +174,7 @@ export class DocumentService {
     updates: Partial<KnowledgeBaseUpdate>
   ): Promise<KnowledgeBase> {
     try {
-      const supabase = createServerSupabaseClient()
+      const supabase = createClient()
       const { data, error } = await (supabase as any)
         .from('knowledge_base')
         .update(updates)

@@ -5,7 +5,6 @@ export interface Database {
         Row: {
           id: string
           user_id: string
-          clerk_id: string
           document_name: string
           document_url: string
           document_type: string
@@ -17,7 +16,6 @@ export interface Database {
         Insert: {
           id?: string
           user_id: string
-          clerk_id?: string
           document_name: string
           document_url: string
           document_type: string
@@ -29,7 +27,6 @@ export interface Database {
         Update: {
           id?: string
           user_id?: string
-          clerk_id?: string
           document_name?: string
           document_url?: string
           document_type?: string
@@ -43,7 +40,6 @@ export interface Database {
         Row: {
           id: string
           user_id: string
-          clerk_id: string
           call_id: string
           call_duration: number
           transcript: string
@@ -57,7 +53,6 @@ export interface Database {
         Insert: {
           id?: string
           user_id: string
-          clerk_id?: string
           call_id: string
           call_duration: number
           transcript: string
@@ -71,7 +66,6 @@ export interface Database {
         Update: {
           id?: string
           user_id?: string
-          clerk_id?: string
           call_id?: string
           call_duration?: number
           transcript?: string

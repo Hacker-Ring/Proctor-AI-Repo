@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { DocumentService } from '../../lib/document-service';
+import { DocumentServiceClient } from '../../lib/document-service-client';
 import { Database } from '../../lib/database.types';
 import DocumentUploadModal from '../components/DocumentUploadModal';
 import ProtectedLayout from '../components/ProtectedLayout';
@@ -75,7 +75,7 @@ export default function ManageData() {
       
       try {
         setLoading(true);
-        const docs = await DocumentService.getUserDocuments(user.id);
+        const docs = await DocumentServiceClient.getUserDocuments(user.id);
         setDocuments(docs);
       } catch (error) {
         console.error('Failed to load documents:', error);
@@ -92,7 +92,7 @@ export default function ManageData() {
     if (!user?.id) return;
     
     try {
-      const docs = await DocumentService.getUserDocuments(user.id);
+      const docs = await DocumentServiceClient.getUserDocuments(user.id);
       setDocuments(docs);
     } catch (error) {
       console.error('Failed to reload documents:', error);
@@ -105,7 +105,7 @@ export default function ManageData() {
     if (!confirm('Are you sure you want to delete this document?')) return;
 
     try {
-      await DocumentService.deleteDocument(documentId, user.id);
+      await DocumentServiceClient.deleteDocument(documentId, user.id);
       setDocuments(prev => prev.filter(doc => doc.id !== documentId));
     } catch (error) {
       console.error('Failed to delete document:', error);

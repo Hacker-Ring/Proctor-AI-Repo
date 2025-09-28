@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { CallMetricsService, VendorDetails } from '../../lib/call-metrics-service';
+import { CallMetricsServiceClient, VendorDetails } from '../../lib/call-metrics-service-client';
 
 export default function CallMetricsExample() {
   const { user } = useAuth();
@@ -15,7 +15,7 @@ export default function CallMetricsExample() {
       
       try {
         setLoading(true);
-        const metrics = await CallMetricsService.getUserCallMetrics(user.id);
+        const metrics = await CallMetricsServiceClient.getUserCallMetrics(user.id);
         setCallMetrics(metrics);
       } catch (error) {
         console.error('Failed to load call metrics:', error);
@@ -45,7 +45,7 @@ export default function CallMetricsExample() {
       const startTime = new Date();
       const endTime = new Date(startTime.getTime() + 5 * 60 * 1000); // 5 minutes later
 
-      await CallMetricsService.saveCallMetrics(
+      await CallMetricsServiceClient.saveCallMetrics(
         user.id,
         callId,
         300, // 5 minutes in seconds
@@ -57,7 +57,7 @@ export default function CallMetricsExample() {
       );
 
       // Reload metrics
-      const metrics = await CallMetricsService.getUserCallMetrics(user.id);
+      const metrics = await CallMetricsServiceClient.getUserCallMetrics(user.id);
       setCallMetrics(metrics);
     } catch (error) {
       console.error('Failed to save sample call:', error);
