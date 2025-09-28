@@ -1,41 +1,35 @@
-import { createServerClient } from "@supabase/ssr";
 import { CallMetricsService } from "../../lib/call-metrics-service";
 import { DocumentService } from "../../lib/document-service";
 import CallMetricsExample from "../components/CallMetricsExample";
 import ProtectedLayout from "../components/ProtectedLayout";
-import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
+import { createServerSupabaseClient } from "../../lib/supabase-server";
 
 export default async function Dashboard() {
-  const cookieStore = cookies();
+  const supabase = createServerSupabaseClient();
+
+  // Check for session first, then get user from session
+  const { data: { session }, error: sessionError } = await supabase.auth.getSession();
   
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        get(name: string) {
-          return cookieStore.get(name)?.value;
-        },
-        set(name: string, value: string, options: any) {
-          cookieStore.set({ name, value, ...options });
-        },
-        remove(name: string, options: any) {
-          cookieStore.set({ name, value: '', ...options });
-        },
-      },
-    }
-  );
+  console.log('Dashboard auth check:', { 
+    hasSession: !!session, 
+    hasUser: !!session?.user, 
+    userId: session?.user?.id,
+    sessionError: sessionError?.message 
+  });
 
-  const { data: { user }, error } = await supabase.auth.getUser();
+  if (!session || !session.user || sessionError) {
+    console.log('Dashboard: No valid session, redirecting to signin:', { 
+      hasSession: !!session, 
+      hasUser: !!session?.user, 
+      error: sessionError?.message 
+    });
+    redirect('/auth/signin');
+  }
 
-  console.log('Dashboard auth check:', { user: user?.id, error });
+  console.log('Dashboard: User authenticated, proceeding to dashboard');
 
-  // Temporarily disable server-side auth check for debugging
-  // if (!user || error) {
-  //   console.log('Redirecting to signin - no user or error:', { user, error });
-  //   redirect('/auth/signin');
-  // }
+  const user = session.user;
 
   // Fetch real call metrics and document stats
   let metrics = {

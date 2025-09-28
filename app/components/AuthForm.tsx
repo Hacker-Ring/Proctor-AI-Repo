@@ -2,8 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { supabase } from '../../lib/supabase';
+import { createClient } from '../../lib/supabase-client';
 import { useAuth } from '../contexts/AuthContext';
+import { UserProfileService } from '../../lib/user-profile-service';
 
 interface AuthFormProps {
   mode: 'signin' | 'signup';
@@ -14,6 +15,7 @@ export default function AuthForm({ mode, onSuccess }: AuthFormProps) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
+  const [phoneNumber, setPhoneNumber] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
@@ -21,34 +23,9 @@ export default function AuthForm({ mode, onSuccess }: AuthFormProps) {
   const router = useRouter();
   const { user, loading: authLoading, signIn: authSignIn, signUp: authSignUp } = useAuth();
 
-  // Auto-redirect if user is already logged in
-  useEffect(() => {
-    if (!authLoading && user) {
-      console.log('User is authenticated, redirecting to dashboard');
-      router.replace('/dashboard');
-    }
-  }, [user, authLoading, router]);
+  // Note: Redirection is now handled at the page level, not in the component
 
-  // Additional check for immediate redirect on mount
-  useEffect(() => {
-    const checkAuth = async () => {
-      if (!authLoading && !user) {
-        try {
-          const { data: { session } } = await supabase.auth.getSession();
-          if (session?.user) {
-            console.log('Found existing session, redirecting to dashboard');
-            router.replace('/dashboard');
-          }
-        } catch (error) {
-          console.error('Error checking session:', error);
-        }
-      }
-    };
-    
-    checkAuth();
-  }, [authLoading, user, router]);
-
-  // Don't render form if user is logged in
+  // Show loading state while checking authentication
   if (authLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
@@ -60,10 +37,6 @@ export default function AuthForm({ mode, onSuccess }: AuthFormProps) {
     );
   }
 
-  if (user) {
-    return null; // Will redirect via useEffect
-  }
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -72,11 +45,23 @@ export default function AuthForm({ mode, onSuccess }: AuthFormProps) {
 
     try {
       if (mode === 'signup') {
-        const { data, error } = await authSignUp(email, password, { name });
+        // Validate phone number format
+        const phoneRegex = /^\+?[\d\s\-\(\)]{10,}$/;
+        if (!phoneRegex.test(phoneNumber)) {
+          setError('Please enter a valid phone number');
+          setLoading(false);
+          return;
+        }
+
+        const { data, error } = await authSignUp(email, password, { name, phone: phoneNumber });
         if (error) {
           setError(error.message);
         } else {
-          setMessage('Check your email for a confirmation link!');
+          setMessage('Account created successfully! Please check your email for confirmation.');
+          // After successful signup, redirect to signin page
+          setTimeout(() => {
+            router.push('/auth/signin');
+          }, 2000);
           if (onSuccess) onSuccess();
         }
       } else {
@@ -85,11 +70,10 @@ export default function AuthForm({ mode, onSuccess }: AuthFormProps) {
           setError(error.message);
         } else {
           setMessage('Successfully signed in!');
-          // Use router.refresh() to refresh the page and ensure middleware can read the new session
+          // Force a hard redirect to ensure server-side session is properly loaded
           setTimeout(() => {
-            router.refresh();
-            router.push('/dashboard');
-          }, 1000);
+            window.location.href = '/dashboard';
+          }, 1500);
           if (onSuccess) onSuccess();
         }
       }
@@ -104,6 +88,7 @@ export default function AuthForm({ mode, onSuccess }: AuthFormProps) {
     setLoading(true);
     setError('');
     try {
+      const supabase = createClient();
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
@@ -126,6 +111,7 @@ export default function AuthForm({ mode, onSuccess }: AuthFormProps) {
     setLoading(true);
     setError('');
     try {
+      const supabase = createClient();
       const { data, error } = await supabase.auth.resend({
         type: 'signup',
         email: email
@@ -151,6 +137,7 @@ export default function AuthForm({ mode, onSuccess }: AuthFormProps) {
       setLoading(false);
     }
   };
+
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
@@ -185,6 +172,23 @@ export default function AuthForm({ mode, onSuccess }: AuthFormProps) {
                   onChange={(e) => setName(e.target.value)}
                   className="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-[6px] focus:outline-none focus:ring-black focus:border-black focus:z-10 sm:text-sm"
                   placeholder="Enter your full name"
+                />
+              </div>
+            )}
+            {mode === 'signup' && (
+              <div>
+                <label htmlFor="phone" className="block text-sm font-medium text-gray-700">
+                  Phone Number <span className="text-red-500">*</span>
+                </label>
+                <input
+                  id="phone"
+                  name="phone"
+                  type="tel"
+                  required={mode === 'signup'}
+                  value={phoneNumber}
+                  onChange={(e) => setPhoneNumber(e.target.value)}
+                  className="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-[6px] focus:outline-none focus:ring-black focus:border-black focus:z-10 sm:text-sm"
+                  placeholder="Enter your phone number"
                 />
               </div>
             )}

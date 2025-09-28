@@ -35,18 +35,16 @@ export async function middleware(req: NextRequest) {
     }
   )
 
-  // Try to get session first, then user
+  // Try to get session first
   const {
     data: { session },
+    error: sessionError
   } = await supabase.auth.getSession()
 
-  // If no session, try to get user directly
+  // Only get user if we have a valid session
   let user = session?.user
-  if (!user) {
-    const {
-      data: { user: userData },
-    } = await supabase.auth.getUser()
-    user = userData
+  if (!user && sessionError) {
+    console.log('Session error:', sessionError.message)
   }
 
   // Debug: Log all cookies to see what's available
@@ -63,19 +61,23 @@ export async function middleware(req: NextRequest) {
     supabaseCookies: supabaseCookies.map(c => ({ name: c.name, value: c.value.substring(0, 20) + '...' }))
   });
 
+  // Log specific Supabase auth cookies
+  const authCookies = allCookies.filter(c => c.name.includes('supabase') || c.name.includes('sb-'));
+  console.log('Auth cookies found:', authCookies.map(c => ({ name: c.name, hasValue: !!c.value })));
+
   // Allow debug page
   if (req.nextUrl.pathname.startsWith('/debug-auth')) {
     return response;
   }
 
-  // Protect dashboard routes - temporarily disabled for debugging
+  // Protect dashboard routes
   if (req.nextUrl.pathname.startsWith('/dashboard') || 
       req.nextUrl.pathname.startsWith('/calls') ||
       req.nextUrl.pathname.startsWith('/manage-data') ||
       req.nextUrl.pathname.startsWith('/analytics')) {
     if (!user) {
-      console.log('Middleware would redirect to signin - no user, but allowing access for debugging');
-      // return NextResponse.redirect(new URL('/auth/signin', req.url))
+      console.log('Redirecting to signin - no authenticated user');
+      return NextResponse.redirect(new URL('/auth/signin', req.url))
     }
   }
 

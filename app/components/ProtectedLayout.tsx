@@ -1,14 +1,52 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import { usePhoneVerification } from '../hooks/usePhoneVerification';
 import Sidebar from './Sidebar';
+import PhoneVerificationModal from './PhoneVerificationModal';
 
 interface ProtectedLayoutProps {
   children: React.ReactNode;
 }
 
 export default function ProtectedLayout({ children }: ProtectedLayoutProps) {
-  const { user } = useAuth();
+  const { user, signOut } = useAuth();
+  const { needsPhoneNumber, checkingPhone, userId } = usePhoneVerification();
+  const [showPhoneModal, setShowPhoneModal] = useState(false);
+  const [isSigningOut, setIsSigningOut] = useState(false);
+
+  // Show phone collection modal if needed
+  useEffect(() => {
+    if (!checkingPhone && needsPhoneNumber && userId) {
+      setShowPhoneModal(true);
+    }
+  }, [needsPhoneNumber, checkingPhone, userId]);
+
+  const handlePhoneVerificationSuccess = () => {
+    setShowPhoneModal(false);
+    // Refresh the page to update the phone verification status
+    window.location.reload();
+  };
+
+  const handleSignOut = async () => {
+    setIsSigningOut(true);
+    try {
+      const { error } = await signOut();
+      if (error) {
+        console.error('Sign out error:', error);
+        alert('Failed to sign out. Please try again.');
+      } else {
+        // Force a hard redirect to clear any cached state
+        window.location.replace('/auth/signin');
+      }
+    } catch (error) {
+      console.error('Sign out error:', error);
+      alert('Failed to sign out. Please try again.');
+    } finally {
+      setIsSigningOut(false);
+    }
+  };
 
   return (
     <div className="flex min-h-screen">
@@ -31,13 +69,11 @@ export default function ProtectedLayout({ children }: ProtectedLayoutProps) {
                 <span className="text-sm text-gray-700">{user?.email || 'Loading...'}</span>
               </div>
               <button
-                onClick={() => {
-                  // Handle sign out
-                  window.location.href = '/auth/signin';
-                }}
-                className="text-sm text-gray-600 hover:text-gray-800"
+                onClick={handleSignOut}
+                disabled={isSigningOut}
+                className="text-sm text-gray-600 hover:text-gray-800 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Sign Out
+                {isSigningOut ? 'Signing out...' : 'Sign Out'}
               </button>
             </div>
           </div>
@@ -46,6 +82,16 @@ export default function ProtectedLayout({ children }: ProtectedLayoutProps) {
           {children}
         </main>
       </div>
+
+      {/* Phone Verification Modal */}
+      {userId && (
+        <PhoneVerificationModal
+          isOpen={showPhoneModal}
+          onClose={() => setShowPhoneModal(false)}
+          onSuccess={handlePhoneVerificationSuccess}
+          userId={userId}
+        />
+      )}
     </div>
   );
 }

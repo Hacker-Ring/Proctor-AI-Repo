@@ -2,14 +2,14 @@
 
 import { createContext, useContext, useEffect, useState } from 'react';
 import { User, Session } from '@supabase/supabase-js';
-import { supabase } from '../../lib/supabase';
+import { createClient } from '../../lib/supabase-client';
 
 interface AuthContextType {
   user: User | null;
   session: Session | null;
   loading: boolean;
   signIn: (email: string, password: string) => Promise<{ data: any; error: any }>;
-  signUp: (email: string, password: string, metadata?: { name?: string }) => Promise<{ data: any; error: any }>;
+  signUp: (email: string, password: string, metadata?: { name?: string; phone?: string }) => Promise<{ data: any; error: any }>;
   signOut: () => Promise<{ error: any }>;
 }
 
@@ -21,7 +21,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Check if supabase client exists
+    // Create supabase client
+    const supabase = createClient();
+    
     if (!supabase) {
       console.error('Supabase client is not properly initialized. Please check your environment variables.');
       setLoading(false);
@@ -32,14 +34,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const initializeAuth = async () => {
       try {
         const { data: { session }, error } = await supabase.auth.getSession();
+        console.log('AuthContext: Initial session check', { 
+          hasSession: !!session, 
+          hasUser: !!session?.user, 
+          userId: session?.user?.id,
+          error: error?.message 
+        });
+        
         if (error) {
           console.error('Error getting session:', error);
+          // Clear any stale state on error
+          setSession(null);
+          setUser(null);
         } else {
           setSession(session);
           setUser(session?.user ?? null);
         }
       } catch (err) {
         console.error('Unexpected error getting session:', err);
+        // Clear any stale state on error
+        setSession(null);
+        setUser(null);
       } finally {
         setLoading(false);
       }
@@ -64,13 +79,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const signIn = async (email: string, password: string) => {
+    const supabase = createClient();
+    
     if (!supabase) {
       return { data: null, error: { message: 'Supabase client not available' } };
     }
-    return await supabase.auth.signInWithPassword({ email, password });
+    
+    console.log('AuthContext: Attempting signin for', email);
+    const result = await supabase.auth.signInWithPassword({ email, password });
+    console.log('AuthContext: Signin result', { 
+      success: !result.error, 
+      error: result.error?.message,
+      hasUser: !!result.data?.user,
+      hasSession: !!result.data?.session
+    });
+    
+    return result;
   };
 
-  const signUp = async (email: string, password: string, metadata?: { name?: string }) => {
+  const signUp = async (email: string, password: string, metadata?: { name?: string; phone?: string }) => {
+    const supabase = createClient();
+    
     if (!supabase) {
       return { data: null, error: { message: 'Supabase client not available' } };
     }
@@ -82,10 +111,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const signOut = async () => {
+    const supabase = createClient();
+    
     if (!supabase) {
       return { error: { message: 'Supabase client not available' } };
     }
-    return await supabase.auth.signOut();
+    
+    try {
+      const { error } = await supabase.auth.signOut();
+      
+      // Clear local state immediately
+      setUser(null);
+      setSession(null);
+      
+      return { error };
+    } catch (error) {
+      console.error('Sign out error:', error);
+      return { error };
+    }
   };
 
   const value = {
