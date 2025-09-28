@@ -1,0 +1,64 @@
+{
+  "timestamp": "2025-09-28T07:27:06.801896",
+  "endpoint": "https://rag-function-app-1758997681.azurewebsites.net/api/rag",
+  "summary": {
+    "total_tests": 12,
+    "passed_tests": 0,
+    "failed_tests": 12,
+    "success_rate": 0.0
+  },
+  "detailed_results": {
+    "health_check": {
+      "status": "unhealthy",
+      "error": "HTTP 404: "
+    },
+    "add_documents": [
+      {
+        "success": false,
+        "error": "HTTP 404: "
+      },
+      {
+        "success": false,
+        "error": "HTTP 404: "
+      },
+      {
+        "success": false,
+        "error": "HTTP 404: "
+      }
+    ],
+    "rag_queries": [
+      {
+        "success": false,
+        "error": "HTTP 404: "
+      },
+      {
+        "success": false,
+        "error": "HTTP 404: "
+      },
+      {
+        "success": false,
+        "error": "HTTP 404: "
+      },
+      {
+        "success": false,
+        "error": "HTTP 404: "
+      },
+      {
+        "success": false,
+        "error": "HTTP 404: "
+      }
+    ],
+    "specific_sources_query": {
+      "success": false,
+      "error": "HTTP 404: "
+    },
+    "clear_kb": {
+      "success": false,
+      "error": "HTTP 404: "
+    },
+    "final_health_check": {
+      "status": "unhealthy",
+      "error": "HTTP 404: "
+    }
+  }
+}
