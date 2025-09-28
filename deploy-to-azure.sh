@@ -38,28 +38,54 @@ echo "📦 Creating deployment package..."
 cd backend
 
 # Create a temporary directory for deployment
-mkdir -p ../deployment-package
-cp -r . ../deployment-package/
-cd ../deployment-package
+mkdir -p ../deployment-temp
+cp -r . ../deployment-temp/
+cd ../deployment-temp
 
 # Remove unnecessary files
 rm -rf venv/
 rm -rf __pycache__/
+rm -rf services/__pycache__/
 rm -rf *.pyc
 rm -rf .env
 rm -rf server.log
+
+# Create deployment zip
+echo "📦 Creating deployment zip..."
+zip -r ../deployment-package.zip . -x "*.pyc" "__pycache__/*" "venv/*" ".env" "server.log"
 
 echo "✅ Deployment package created"
 
 # Deploy to Azure Web App
 echo "🚀 Deploying to Azure Web App..."
 
-# Method 1: Using Azure CLI (if you have the web app configured)
+# Configure the web app for Python
+echo "⚙️ Configuring web app for Python..."
+az webapp config set \
+    --resource-group $AZURE_RESOURCE_GROUP \
+    --name $AZURE_WEBAPP_NAME \
+    --python-version 3.10
+
+# Set startup command
+echo "⚙️ Setting startup command..."
+az webapp config set \
+    --resource-group $AZURE_RESOURCE_GROUP \
+    --name $AZURE_WEBAPP_NAME \
+    --startup-file "startup.py"
+
+# Enable build during deployment
+echo "⚙️ Enabling build during deployment..."
+az webapp config appsettings set \
+    --resource-group $AZURE_RESOURCE_GROUP \
+    --name $AZURE_WEBAPP_NAME \
+    --settings SCM_DO_BUILD_DURING_DEPLOYMENT=true
+
+# Deploy the zip file
 echo "📤 Uploading files to Azure Web App..."
 az webapp deployment source config-zip \
     --resource-group $AZURE_RESOURCE_GROUP \
     --name $AZURE_WEBAPP_NAME \
-    --src deployment-package.zip
+    --src ../deployment-package.zip
 
 if [ $? -eq 0 ]; then
     echo "✅ Deployment successful!"
@@ -79,6 +105,7 @@ fi
 
 # Cleanup
 cd ..
-rm -rf deployment-package
+rm -rf deployment-temp
+rm -f deployment-package.zip
 
 echo "🎉 Deployment process completed!"
